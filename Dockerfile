@@ -1,6 +1,8 @@
 FROM docker.io/library/ubuntu:22.04
 
+
 WORKDIR /var/www/html
+
 
 # Установка зависимостей
 RUN ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo UTC > /etc/timezone \
@@ -45,13 +47,18 @@ RUN ln -snf /usr/share/zoneinfo/UTC /etc/localtime && echo UTC > /etc/timezone \
        php-xdebug \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Установка зависимостей Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Установка зависимостей приложения
+COPY composer.json composer.lock /var/www/html/
+RUN composer install --no-scripts --no-autoloader && rm -rf /root/.composer
+
 # Настройка среды
 COPY start-container /usr/local/bin/start-container
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY php.ini /etc/php/8.2/cli/conf.d/99-sail.ini
 COPY www.conf /etc/php/8.2/cli/conf.d/zzz-www.conf
-
-RUN chmod +x /usr/local/bin/start-container
 
 #Добавление пользователя www-data
 ARG WWWUSER
@@ -68,6 +75,9 @@ WORKDIR /var/www/html
 
 #Копирование конфигурационных файлов
 COPY ./docker/supervisor/*.conf /etc/supervisor/conf.d/
+
+#Копирование миграций
+COPY ./database/migrations /var/www/html/database/migrations
 
 #Открытие портов
 EXPOSE 80 443

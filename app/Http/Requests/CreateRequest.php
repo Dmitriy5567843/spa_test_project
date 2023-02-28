@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use PhpParser\Node\Stmt\DeclareDeclare;
 
 class CreateRequest extends FormRequest
 {
@@ -14,10 +15,12 @@ class CreateRequest extends FormRequest
      */
     public function rules(): array
     {
+
         return [
             'name'=>['required',],
-            'email'=>['required'],
+            'email'=>['required','email'],
             'content'=>['required'],
+            'files.*' => ['nullable','file', 'max:200'],
         ];
     }
 }

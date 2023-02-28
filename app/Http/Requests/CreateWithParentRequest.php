@@ -17,9 +17,12 @@ class CreateWithParentRequest extends FormRequest
     {
         return [
             'name'=>['required'],
-            'email'=>['required'],
+            'email'=>['required', 'email'],
             'content'=>['required'],
-            'parent_id'=>['required']
+            'parent_id'=>['required'],
+            'files.*' => ['nullable', 'file', 'max:200'],
         ];
+
     }
+
 }
