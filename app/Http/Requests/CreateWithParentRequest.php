@@ -16,11 +16,11 @@ class CreateWithParentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'=>['required'],
-            'email'=>['required', 'email'],
-            'content'=>['required'],
-            'parent_id'=>['required'],
-            'files.*' => ['nullable', 'file', 'max:200'],
+            'name'=>['required','min:1','max:255',],
+            'email'=>['required', 'email', 'min:3','max:255',],
+            'content'=>['required','string','max:255',],
+            'parent_id'=>['required',],
+            'files.*' => ['nullable', 'file','mimes:txt,jpg,gif,png', 'max:200'],
         ];
 
     }

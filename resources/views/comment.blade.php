@@ -5,7 +5,17 @@
         <div class="card-body" style="margin-left: 30px">
             <p class="card-title">Name: {{ $comment->name }}</p>
             <p class="card-title">Email: {{ $comment->email }}</p>
-            <p class="card-text">{{ $comment->content }}</p>
+            <p class="card-text">{{ $comment->content }}
+
+            @if(!empty($comment->files))
+                @foreach($comment->files as $file)
+                    <div class="card-image">
+                        <img src="data:image/png;base64,{{ base64_encode($file->base_64) }}" alt="Image">
+                    </div>
+                @endforeach
+            @endif
+
+
             <button id="addCommentBtn{{$comment->id}}" data-id="{{$comment->id}}" type="button" class="btn btn-primary" data-toggle="modal"
                     data-target="#addCommentModal">
                 Добавить комментарий

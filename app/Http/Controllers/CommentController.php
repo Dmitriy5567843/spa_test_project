@@ -12,6 +12,7 @@ use App\Models\File;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class CommentController extends Controller
 {
@@ -39,16 +40,15 @@ class CommentController extends Controller
         $comments = Comment::whereNull('parent_id')
             ->orderBy('created_at', 'desc')
             ->paginate(25);
-    //    $file = Comment::with('files')->get();
 
         foreach ($comments as $comment) {
             $comment->children = $this->getChildren($comment->id);
-           // $comment->filePaths = $comment->files->pluck('name')->toArray();
         }
 
 
         return view('welcome', ['comments' => $comments]);
     }
+
 
     public function store(CommentService $commentService, FileService $fileService, CreateWithParentRequest $request): RedirectResponse
     {
@@ -61,7 +61,7 @@ class CommentController extends Controller
         ));
 
         try {
-            $files = $request->file();
+            $files = $request->file('files');
             $fileService->uploadFiles($files, $comment->id);
 
             return redirect()->route('comment.index')->with('success', 'Comment added successfully!');

@@ -102,7 +102,26 @@
                 <p class="card-title">Name: {{ $comment->name }}</p>
                 <p class="card-title">Email: {{ $comment->email }}</p>
                 <p class="card-text">{{ $comment->content }}
-                </p>
+
+
+                @if(!empty($comment->files))
+                    @foreach($comment->files as $file)
+{{--                        {{dd($file)}}--}}
+                        @if($file->type === 'txt')
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ $file->name }}</h6>
+                                    <a href="{{route('download', $file->name)}}" class="btn btn-primary" target="_blank">Скачать</a>
+                                </div>
+                            </div>
+                        @else
+                            <div class="card-image" style="margin-bottom:10px">
+                                <img src="data:image/png;base64,{{ base64_encode($file->base_64) }}" alt="Image">
+                            </div>
+                        @endif
+                    @endforeach
+                @endif
+
                 <button id="addCommentBtn{{$comment->id}}" data-id="{{$comment->id}}" type="button"
                         class="btn btn-primary" data-toggle="modal"
                         data-target="#addCommentModal">
@@ -132,7 +151,7 @@
                 </div>
                 <div class="modal-body">
                     <!-- форма для добавления комментария -->
-                    <form method="POST" action="{{ route('comments.store') }}">
+                    <form method="POST" action="{{ route('comments.store') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="form-group">
                             <label for="name">Имя</label>
