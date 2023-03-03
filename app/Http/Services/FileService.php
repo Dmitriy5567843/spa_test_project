@@ -30,7 +30,16 @@ class FileService
                         'comment_id'=> $commentId,
                         'name' => $newFilename,
                     ]);
+
+                    continue;
                 }
+
+                $file->move(storage_path('app/public/uploads/'), $newFilename);
+
+                File::create([
+                    'comment_id'=> $commentId,
+                    'name' => $newFilename,
+                ]);
             }
         }
     }

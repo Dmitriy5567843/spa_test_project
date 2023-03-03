@@ -8,7 +8,6 @@ use App\Http\Requests\CreateWithParentRequest;
 use App\Http\Services\CommentService;
 use App\Http\Services\FileService;
 use App\Models\Comment;
-use App\Models\File;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
@@ -16,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 
 class CommentController extends Controller
 {
-    public function create(CommentService $commentService, FileService $fileService, CreateRequest $request,): RedirectResponse
+    public function create(CreateRequest $request, CommentService $commentService, FileService $fileService): RedirectResponse
     {
             $comment = $commentService->SimpleFormCreate(new CreateCommentDTO(
                 $request->get('name'),
@@ -38,19 +37,29 @@ class CommentController extends Controller
     public function index(): View
     {
         $comments = Comment::whereNull('parent_id')
+            ->with('files')
             ->orderBy('created_at', 'desc')
             ->paginate(25);
 
         foreach ($comments as $comment) {
+            if (!empty($comment->files)) {
+                foreach ($comment->files as $file) {
+                    $fileType = pathinfo($file->name, PATHINFO_EXTENSION);
+                    $file->setAttribute('type', pathinfo($file->name, PATHINFO_EXTENSION));
+
+                    if ($fileType !== 'txt') {
+                        $file->setAttribute('base_64', Storage::get("public/uploads/$file->name"));
+                    }
+                }
+            }
             $comment->children = $this->getChildren($comment->id);
         }
-
 
         return view('welcome', ['comments' => $comments]);
     }
 
 
-    public function store(CommentService $commentService, FileService $fileService, CreateWithParentRequest $request): RedirectResponse
+    public function store(CreateWithParentRequest $request, CommentService $commentService, FileService $fileService): RedirectResponse
     {
 
       $comment = $commentService->ModalFormCreate(new CreateCommentDTO(
@@ -70,13 +79,30 @@ class CommentController extends Controller
         }
     }
 
+    public function download(string $fileName)
+    {
+        return response()->download(storage_path('app/public/uploads/' . $fileName));
+
+    }
+
     private function getChildren($parentId): Collection
     {
         $children = Comment::where('parent_id', $parentId)
+            ->with('files')
             ->orderBy('created_at', 'desc')
             ->get();
 
         foreach ($children as $child) {
+            if (!empty($child->files)) {
+                foreach ($child->files as $file) {
+                    $fileType = pathinfo($file->name, PATHINFO_EXTENSION);
+                    $file->setAttribute('type', pathinfo($file->name, PATHINFO_EXTENSION));
+
+                    if ($fileType !== 'txt') {
+                        $file->setAttribute('base_64', Storage::get("public/uploads/$file->name"));
+                    }
+                }
+            }
             $child->children = $this->getChildren($child->id);
         }
 

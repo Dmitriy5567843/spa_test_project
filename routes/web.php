@@ -17,3 +17,4 @@ use Illuminate\Support\Facades\Route;
 Route::post('/', [CommentController::class, 'create'])->name('comment.create');
 Route::get('/', [CommentController::class, 'index'])->name('comment.index');
 Route::post('/store', [CommentController::class, 'store'])->name('comments.store');
+Route::get('/download/{name}', [CommentController::class, 'download'])->name('download');

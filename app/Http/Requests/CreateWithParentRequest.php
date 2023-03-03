@@ -22,7 +22,5 @@ class CreateWithParentRequest extends FormRequest
             'parent_id'=>['required',],
             'files.*' => ['nullable', 'file','mimes:txt,jpg,gif,png', 'max:200'],
         ];
-
     }
-
 }
