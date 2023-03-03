@@ -9,9 +9,19 @@
 
             @if(!empty($comment->files))
                 @foreach($comment->files as $file)
-                    <div class="card-image">
-                        <img src="data:image/png;base64,{{ base64_encode($file->base_64) }}" alt="Image">
-                    </div>
+                    {{--                        {{dd($file)}}--}}
+                    @if($file->type === 'txt')
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ $file->name }}</h6>
+                                <a href="{{route('download', $file->name)}}" class="btn btn-primary" target="_blank">Скачать</a>
+                            </div>
+                        </div>
+                    @else
+                        <div class="card-image" style="margin-bottom:10px">
+                            <img src="data:image/png;base64,{{ base64_encode($file->base_64) }}" alt="Image">
+                        </div>
+                    @endif
                 @endforeach
             @endif
 
